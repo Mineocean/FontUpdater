@@ -24,7 +24,7 @@ jobs:
       run: nuget restore FontManager/FontManager.csproj -PackagesDirectory FontManager/packages
 
     - name: Build
-      run: msbuild FontManager/FontManager.csproj /p:Configuration=Release /p:Platform="Any CPU"
+      run: msbuild FontManager/FontManager.csproj /p:Configuration=Release /p:Platform=AnyCPU
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
