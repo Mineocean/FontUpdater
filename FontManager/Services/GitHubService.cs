@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using FontManager.Models;
 using FontManager.Utils;
@@ -95,14 +97,55 @@ namespace FontManager.Services
         {
             try
             {
-                var data = await HttpClient.GetByteArrayAsync(asset.BrowserDownloadUrl);
-                System.IO.File.WriteAllBytes(filePath, data);
+                UpdateAuthToken();
+                using (var response = await HttpClient.GetAsync(asset.BrowserDownloadUrl, HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode();
+                    using (var stream = await response.Content.ReadAsStreamAsync())
+                    using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                    {
+                        await stream.CopyToAsync(fileStream);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 Logger.Error($"Failed to download asset {asset.Name} to file", ex);
                 throw;
             }
+        }
+
+        public async Task<List<string>> DownloadAssetsParallelAsync(List<GitHubAsset> assets, string directory, 
+            int maxConcurrency = 3, IProgress<int> progress = null)
+        {
+            var downloadedFiles = new List<string>();
+            var semaphore = new SemaphoreSlim(maxConcurrency);
+            var completedCount = 0;
+
+            var tasks = assets.Select(async asset =>
+            {
+                await semaphore.WaitAsync();
+                try
+                {
+                    string filePath = Path.Combine(directory, asset.Name);
+                    await DownloadAssetToFileAsync(asset, filePath);
+                    downloadedFiles.Add(filePath);
+                    
+                    int current = Interlocked.Increment(ref completedCount);
+                    progress?.Report((int)((current / (double)assets.Count) * 100));
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Failed to download {asset.Name}", ex);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            });
+
+            await Task.WhenAll(tasks);
+            return downloadedFiles;
         }
     }
 }

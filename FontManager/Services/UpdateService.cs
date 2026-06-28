@@ -115,20 +115,14 @@ namespace FontManager.Services
                     Directory.CreateDirectory(downloadDir);
                 }
 
-                int totalAssets = updateInfo.FontAssets.Count;
-                int completedAssets = 0;
+                ReportProgress(updateInfo.FontFamily.Name, 20, "并发下载中...");
 
-                foreach (var asset in updateInfo.FontAssets)
+                var progress = new Progress<int>(percent =>
                 {
-                    ReportProgress(updateInfo.FontFamily.Name, 
-                        20 + (int)((completedAssets / (double)totalAssets) * 60),
-                        $"下载 {asset.Name}...");
+                    ReportProgress(updateInfo.FontFamily.Name, 20 + (int)(percent * 0.6), $"下载中...{percent}%");
+                });
 
-                    string filePath = Path.Combine(downloadDir, asset.Name);
-                    await _gitHubService.DownloadAssetToFileAsync(asset, filePath);
-
-                    completedAssets++;
-                }
+                await _gitHubService.DownloadAssetsParallelAsync(updateInfo.FontAssets, downloadDir, 4, progress);
 
                 ReportProgress(updateInfo.FontFamily.Name, 80, "安装字体...");
 

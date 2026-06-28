@@ -187,32 +187,20 @@ namespace FontManager.Forms
                             Directory.CreateDirectory(downloadDir);
                         }
 
-                        int total = update.FontAssets.Count;
-                        int completed = 0;
-                        int failed = 0;
+                        toolStripStatusLabel.Text = $"并发下载 {family.Name} 中...";
 
-                        foreach (var asset in update.FontAssets)
+                        var progress = new Progress<int>(percent =>
                         {
-                            toolStripStatusLabel.Text = $"下载 {asset.Name} ({completed + 1}/{total})...";
-                            progressBar.Value = (int)((completed / (double)total) * 100);
+                            progressBar.Value = percent;
+                            toolStripStatusLabel.Text = $"下载中...{percent}%";
+                        });
 
-                            try
-                            {
-                                string filePath = Path.Combine(downloadDir, asset.Name);
-                                await _gitHubService.DownloadAssetToFileAsync(asset, filePath);
-                                completed++;
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.Error($"Failed to download {asset.Name}", ex);
-                                failed++;
-                            }
-                        }
+                        var downloadedFiles = await _gitHubService.DownloadAssetsParallelAsync(
+                            update.FontAssets, downloadDir, 4, progress);
 
                         progressBar.Value = 100;
-                        string message = $"下载完成！\n成功: {completed} 个文件\n失败: {failed} 个文件\n保存位置: {downloadDir}";
-                        MessageBox.Show(message, "下载完成", MessageBoxButtons.OK, 
-                            failed > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+                        string message = $"下载完成！\n文件数: {downloadedFiles.Count}\n保存位置: {downloadDir}";
+                        MessageBox.Show(message, "下载完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         
                         toolStripStatusLabel.Text = $"下载完成: {family.Name}";
                     }
