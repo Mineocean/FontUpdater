@@ -99,7 +99,16 @@ namespace FontManager.Forms
             {
                 Logger.Error("Failed to check for updates", ex);
                 toolStripStatusLabel.Text = "检查更新失败";
-                MessageBox.Show($"检查更新失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
+                string errorMsg = ex.Message;
+                if (errorMsg.Contains("API rate limit") || errorMsg.Contains("403"))
+                {
+                    errorMsg += "\n\nGitHub API 限制：未配置Token时每小时仅60次请求。\n" +
+                                "请在 设置 中配置GitHub Token以提升至5000次/小时。\n" +
+                                "Token获取：https://github.com/settings/tokens/new";
+                }
+                
+                MessageBox.Show($"检查更新失败: {errorMsg}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

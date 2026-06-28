@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 using FontManager.Utils;
 
@@ -81,6 +82,22 @@ namespace FontManager.Forms
                 {
                     txtBackupDir.Text = dialog.SelectedPath;
                 }
+            }
+        }
+
+        private void lnkGetToken_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://github.com/settings/tokens/new?scopes=&description=FontManager",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"无法打开浏览器: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

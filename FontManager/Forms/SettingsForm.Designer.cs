@@ -26,6 +26,8 @@ namespace FontManager.Forms
             this.btnBrowseBackup = new System.Windows.Forms.Button();
             this.lblGitHubToken = new System.Windows.Forms.Label();
             this.txtGitHubToken = new System.Windows.Forms.TextBox();
+            this.lnkGetToken = new System.Windows.Forms.LinkLabel();
+            this.lblTokenHint = new System.Windows.Forms.Label();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnReset = new System.Windows.Forms.Button();
@@ -114,7 +116,24 @@ namespace FontManager.Forms
             this.txtGitHubToken.TabIndex = 1;
             this.txtGitHubToken.UseSystemPasswordChar = true;
             
-            this.btnSave.Location = new System.Drawing.Point(260, 250);
+            this.lnkGetToken.AutoSize = true;
+            this.lnkGetToken.Location = new System.Drawing.Point(15, 50);
+            this.lnkGetToken.Name = "lnkGetToken";
+            this.lnkGetToken.Size = new System.Drawing.Size(200, 13);
+            this.lnkGetToken.TabIndex = 2;
+            this.lnkGetToken.TabStop = true;
+            this.lnkGetToken.Text = "点此获取GitHub Token (免费)";
+            this.lnkGetToken.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkGetToken_LinkClicked);
+            
+            this.lblTokenHint.AutoSize = true;
+            this.lblTokenHint.ForeColor = System.Drawing.Color.Gray;
+            this.lblTokenHint.Location = new System.Drawing.Point(15, 70);
+            this.lblTokenHint.Name = "lblTokenHint";
+            this.lblTokenHint.Size = new System.Drawing.Size(380, 13);
+            this.lblTokenHint.TabIndex = 3;
+            this.lblTokenHint.Text = "未配置Token时，GitHub API每小时限60次请求，配置后提升至5000次";
+            
+            this.btnSave.Location = new System.Drawing.Point(260, 300);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 25);
             this.btnSave.TabIndex = 9;
@@ -123,7 +142,7 @@ namespace FontManager.Forms
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(341, 250);
+            this.btnCancel.Location = new System.Drawing.Point(341, 300);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 25);
             this.btnCancel.TabIndex = 10;
@@ -131,7 +150,7 @@ namespace FontManager.Forms
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             
-            this.btnReset.Location = new System.Drawing.Point(12, 250);
+            this.btnReset.Location = new System.Drawing.Point(12, 300);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(75, 25);
             this.btnReset.TabIndex = 11;
@@ -164,18 +183,20 @@ namespace FontManager.Forms
             
             this.groupBoxGitHub.Controls.Add(this.lblGitHubToken);
             this.groupBoxGitHub.Controls.Add(this.txtGitHubToken);
+            this.groupBoxGitHub.Controls.Add(this.lnkGetToken);
+            this.groupBoxGitHub.Controls.Add(this.lblTokenHint);
             this.groupBoxGitHub.Location = new System.Drawing.Point(12, 200);
             this.groupBoxGitHub.Name = "groupBoxGitHub";
-            this.groupBoxGitHub.Size = new System.Drawing.Size(420, 50);
+            this.groupBoxGitHub.Size = new System.Drawing.Size(420, 90);
             this.groupBoxGitHub.TabIndex = 14;
             this.groupBoxGitHub.TabStop = false;
-            this.groupBoxGitHub.Text = "GitHub设置 (可选，用于解决API限制)";
+            this.groupBoxGitHub.Text = "GitHub设置";
             
             this.AcceptButton = this.btnSave;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(444, 290);
+            this.ClientSize = new System.Drawing.Size(444, 340);
             this.Controls.Add(this.groupBoxGeneral);
             this.Controls.Add(this.groupBoxPaths);
             this.Controls.Add(this.groupBoxGitHub);
@@ -209,6 +230,8 @@ namespace FontManager.Forms
         private System.Windows.Forms.Button btnBrowseBackup;
         private System.Windows.Forms.Label lblGitHubToken;
         private System.Windows.Forms.TextBox txtGitHubToken;
+        private System.Windows.Forms.LinkLabel lnkGetToken;
+        private System.Windows.Forms.Label lblTokenHint;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnReset;
