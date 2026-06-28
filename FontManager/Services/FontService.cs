@@ -42,7 +42,8 @@ namespace FontManager.Services
                     foreach (var file in Directory.GetFiles(SystemFontDirectory, "*.ttf"))
                     {
                         var fontFile = CreateFontFileFromFile(file);
-                        if (fontFile != null && fontFile.FontFamilyName.Contains("LXGW", StringComparison.OrdinalIgnoreCase))
+                        if (fontFile != null && fontFile.FontFamilyName != null && 
+                            fontFile.FontFamilyName.IndexOf("LXGW", StringComparison.OrdinalIgnoreCase) >= 0)
                         {
                             fonts.Add(fontFile);
                         }
