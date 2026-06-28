@@ -1,0 +1,40 @@
+## .NET / C#
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+
+## Visual Studio
+.vs/
+*.csproj.user
+*.rsuser
+
+## NuGet
+packages/
+*.nupkg
+
+## Rider
+.idea/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Build
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+## Font files (large binaries)
+*.ttf
+*.otf
+*.woff
+*.woff2
+
+## Logs
+*.log
