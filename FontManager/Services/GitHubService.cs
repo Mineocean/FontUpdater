@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using FontManager.Models;
 using FontManager.Utils;
@@ -17,6 +18,19 @@ namespace FontManager.Services
         {
             HttpClient.DefaultRequestHeaders.Add("User-Agent", "FontManager/1.0");
             HttpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+        }
+
+        private static void UpdateAuthToken()
+        {
+            string token = ConfigManager.Settings.GitHubToken;
+            if (!string.IsNullOrEmpty(token))
+            {
+                if (HttpClient.DefaultRequestHeaders.Authorization == null || 
+                    HttpClient.DefaultRequestHeaders.Authorization.Parameter != token)
+                {
+                    HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+            }
         }
 
         public static List<FontFamily> GetSupportedFontFamilies()
@@ -37,6 +51,7 @@ namespace FontManager.Services
         {
             try
             {
+                UpdateAuthToken();
                 string url = $"{ApiBase}/repos/{owner}/{repo}/releases/latest";
                 var response = await HttpClient.GetStringAsync(url);
                 return JsonConvert.DeserializeObject<GitHubRelease>(response);
@@ -44,7 +59,7 @@ namespace FontManager.Services
             catch (Exception ex)
             {
                 Logger.Error($"Failed to get latest release for {owner}/{repo}", ex);
-                return null;
+                throw;
             }
         }
 

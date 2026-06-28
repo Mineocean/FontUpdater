@@ -24,6 +24,7 @@ namespace FontManager.Forms
             chkBackupBeforeUpdate.Checked = settings.CreateBackupBeforeUpdate;
             txtDownloadDir.Text = settings.DownloadDirectory;
             txtBackupDir.Text = settings.BackupDirectory;
+            txtGitHubToken.Text = settings.GitHubToken;
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -34,6 +35,7 @@ namespace FontManager.Forms
             settings.CreateBackupBeforeUpdate = chkBackupBeforeUpdate.Checked;
             settings.DownloadDirectory = txtDownloadDir.Text;
             settings.BackupDirectory = txtBackupDir.Text;
+            settings.GitHubToken = txtGitHubToken.Text;
             ConfigManager.Save();
 
             DialogResult = DialogResult.OK;

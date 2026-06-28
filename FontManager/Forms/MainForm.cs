@@ -73,12 +73,17 @@ namespace FontManager.Forms
                     if (update != null)
                     {
                         row.Cells["colLatest"].Value = update.LatestVersion;
-                        row.Cells["colStatus"].Value = update.HasUpdate ? "有更新" : "已是最新";
+                        row.Cells["colStatus"].Value = update.HasUpdate ? $"有更新 ({update.FontAssets.Count}个文件)" : "已是最新";
                         
                         if (update.HasUpdate)
                         {
                             row.DefaultCellStyle.ForeColor = System.Drawing.Color.Blue;
                         }
+                    }
+                    else
+                    {
+                        row.Cells["colLatest"].Value = "获取失败";
+                        row.Cells["colStatus"].Value = "检查失败";
                     }
                 }
 

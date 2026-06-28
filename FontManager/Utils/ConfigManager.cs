@@ -24,6 +24,7 @@ namespace FontManager.Utils
         public string ProxyAddress { get; set; } = "";
         public int ProxyPort { get; set; } = 0;
         public DateTime LastUpdateCheck { get; set; } = DateTime.MinValue;
+        public string GitHubToken { get; set; } = "";
     }
 
     public static class ConfigManager

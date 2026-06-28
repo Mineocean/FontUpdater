@@ -43,18 +43,28 @@ namespace FontManager.Services
         public async Task<List<UpdateInfo>> CheckForUpdatesAsync(List<FontFamily> fontFamilies)
         {
             var updates = new List<UpdateInfo>();
+            var errors = new List<string>();
 
             foreach (var fontFamily in fontFamilies)
             {
                 try
                 {
                     var latestRelease = await _gitHubService.GetLatestReleaseAsync(fontFamily.RepoOwner, fontFamily.RepoName);
-                    if (latestRelease == null) continue;
+                    if (latestRelease == null)
+                    {
+                        errors.Add($"{fontFamily.Name}: 无法获取Release信息");
+                        continue;
+                    }
 
                     var installedFonts = _fontService.GetInstalledFontsByFamily(fontFamily.Name);
-                    string currentVersion = installedFonts.FirstOrDefault()?.Version ?? "0.0.0";
+                    string currentVersion = installedFonts.FirstOrDefault()?.Version ?? "未安装";
 
                     var fontAssets = latestRelease.Assets.Where(a => a.IsFontFile).ToList();
+                    
+                    if (fontAssets.Count == 0)
+                    {
+                        errors.Add($"{fontFamily.Name}: Release中没有字体文件");
+                    }
 
                     bool hasUpdate = CompareVersions(latestRelease.Version, currentVersion) > 0;
 
@@ -70,8 +80,14 @@ namespace FontManager.Services
                 }
                 catch (Exception ex)
                 {
+                    errors.Add($"{fontFamily.Name}: {ex.Message}");
                     Logger.Error($"Failed to check updates for {fontFamily.Name}", ex);
                 }
+            }
+
+            if (errors.Count > 0)
+            {
+                Logger.Warning($"Update check errors:\n{string.Join("\n", errors)}");
             }
 
             return updates;
