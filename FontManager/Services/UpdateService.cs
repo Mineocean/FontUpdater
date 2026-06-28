@@ -160,19 +160,30 @@ namespace FontManager.Services
 
         private int CompareVersions(string version1, string version2)
         {
+            if (string.IsNullOrEmpty(version1) || version1 == "未安装")
+                return string.IsNullOrEmpty(version2) || version2 == "未安装" ? 0 : -1;
+            if (string.IsNullOrEmpty(version2) || version2 == "未安装")
+                return 1;
+
             try
             {
-                var v1Parts = version1.TrimStart('v').Split('.').Select(int.Parse).ToArray();
-                var v2Parts = version2.TrimStart('v').Split('.').Select(int.Parse).ToArray();
+                string v1 = version1.TrimStart('v', 'V').Trim();
+                string v2 = version2.TrimStart('v', 'V').Trim();
+
+                var v1Parts = v2.Split('.').Select(s => { int.TryParse(s, out int n); return n; }).ToArray();
+                var v2Parts = v2.Split('.').Select(s => { int.TryParse(s, out int n); return n; }).ToArray();
+
+                v1Parts = v1.Split('.').Select(s => { int.TryParse(s, out int n); return n; }).ToArray();
+                v2Parts = v2.Split('.').Select(s => { int.TryParse(s, out int n); return n; }).ToArray();
 
                 int maxLength = Math.Max(v1Parts.Length, v2Parts.Length);
                 for (int i = 0; i < maxLength; i++)
                 {
-                    int v1 = i < v1Parts.Length ? v1Parts[i] : 0;
-                    int v2 = i < v2Parts.Length ? v2Parts[i] : 0;
+                    int a = i < v1Parts.Length ? v1Parts[i] : 0;
+                    int b = i < v2Parts.Length ? v2Parts[i] : 0;
 
-                    if (v1 > v2) return 1;
-                    if (v1 < v2) return -1;
+                    if (a > b) return 1;
+                    if (a < b) return -1;
                 }
 
                 return 0;

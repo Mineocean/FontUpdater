@@ -2,27 +2,12 @@ using System;
 using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace FontManager.Utils
 {
     public static class FontReader
     {
-        [DllImport("gdi32.dll")]
-        private static extern int GetFontData(IntPtr hdc, uint dwTable, uint dwOffset, byte[] lpBuffer, int cbData);
-
-        [DllImport("gdi32.dll")]
-        private static extern IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobj);
-
-        [DllImport("gdi32.dll")]
-        private static extern bool DeleteObject(IntPtr hObject);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetDC(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
-
         public static string GetFontVersion(string fontPath)
         {
             try
@@ -30,48 +15,6 @@ namespace FontManager.Utils
                 if (!File.Exists(fontPath))
                     return null;
 
-                using (var privateFonts = new PrivateFontCollection())
-                {
-                    privateFonts.AddFontFile(fontPath);
-                    if (privateFonts.Families.Length == 0)
-                        return null;
-
-                    var font = privateFonts.Families[0];
-                    using (var bmp = new Bitmap(1, 1))
-                    using (var g = Graphics.FromImage(bmp))
-                    {
-                        IntPtr hdc = g.GetHdc();
-                        using (var fontObj = new Font(font, 12))
-                        {
-                            IntPtr hFont = fontObj.ToHfont();
-                            IntPtr oldFont = SelectObject(hdc, hFont);
-
-                            byte[] versionData = new byte[256];
-                            int result = GetFontData(hdc, 0x00000000, 0, versionData, versionData.Length);
-
-                            SelectObject(hdc, oldFont);
-                            DeleteObject(hFont);
-                            g.ReleaseHdc(hdc);
-
-                            if (result > 0)
-                            {
-                                return ParseVersionFromNameTable(fontPath);
-                            }
-                        }
-                    }
-                }
-            }
-            catch
-            {
-            }
-
-            return ParseVersionFromNameTable(fontPath);
-        }
-
-        private static string ParseVersionFromNameTable(string fontPath)
-        {
-            try
-            {
                 byte[] fileBytes = File.ReadAllBytes(fontPath);
                 
                 if (fileBytes.Length < 12)
@@ -94,15 +37,20 @@ namespace FontManager.Utils
                                                   (fileBytes[offset + 10] << 8) | 
                                                   fileBytes[offset + 11]);
                         
-                        return ParseNameTable(fileBytes, tableOffset);
+                        string version = ParseNameTable(fileBytes, tableOffset);
+                        if (!string.IsNullOrEmpty(version))
+                        {
+                            return ExtractVersionNumber(version);
+                        }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Debug($"Failed to read font version from {fontPath}: {ex.Message}");
             }
 
-            return null;
+            return ExtractVersionFromFileName(fontPath);
         }
 
         private static string ParseNameTable(byte[] data, uint tableOffset)
@@ -112,11 +60,10 @@ namespace FontManager.Utils
                 if (tableOffset + 6 > data.Length)
                     return null;
 
-                uint format = (uint)((data[tableOffset] << 8) | data[tableOffset + 1]);
                 uint count = (uint)((data[tableOffset + 2] << 8) | data[tableOffset + 3]);
                 uint stringOffset = (uint)((data[tableOffset + 4] << 8) | data[tableOffset + 5]);
 
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < count && i < 100; i++)
                 {
                     uint recordOffset = tableOffset + 6 + (uint)(i * 12);
                     if (recordOffset + 12 > data.Length)
@@ -124,32 +71,70 @@ namespace FontManager.Utils
 
                     uint platformID = (uint)((data[recordOffset] << 8) | data[recordOffset + 1]);
                     uint encodingID = (uint)((data[recordOffset + 2] << 8) | data[recordOffset + 3]);
-                    uint languageID = (uint)((data[recordOffset + 4] << 8) | data[recordOffset + 5]);
                     uint nameID = (uint)((data[recordOffset + 6] << 8) | data[recordOffset + 7]);
                     uint length = (uint)((data[recordOffset + 8] << 8) | data[recordOffset + 9]);
-                    uint offset = (uint)((data[recordOffset + 10] << 8) | data[recordOffset + 11]);
+                    uint strOffset = (uint)((data[recordOffset + 10] << 8) | data[recordOffset + 11]);
 
                     if (nameID == 5)
                     {
-                        uint absoluteOffset = tableOffset + stringOffset + offset;
-                        if (absoluteOffset + length > data.Length)
-                            break;
+                        uint absoluteOffset = tableOffset + stringOffset + strOffset;
+                        if (absoluteOffset + length > data.Length || length == 0)
+                            continue;
 
-                        if (platformID == 3)
+                        try
                         {
-                            return System.Text.Encoding.BigEndianUnicode.GetString(data, (int)absoluteOffset, (int)length);
+                            string versionStr = null;
+                            if (platformID == 3 && encodingID == 1)
+                            {
+                                versionStr = System.Text.Encoding.BigEndianUnicode.GetString(data, (int)absoluteOffset, (int)length);
+                            }
+                            else if (platformID == 1 && encodingID == 0)
+                            {
+                                versionStr = System.Text.Encoding.ASCII.GetString(data, (int)absoluteOffset, (int)length);
+                            }
+
+                            if (!string.IsNullOrEmpty(versionStr) && versionStr.Contains("Version"))
+                            {
+                                return versionStr;
+                            }
                         }
-                        else if (platformID == 1 && encodingID == 0)
-                        {
-                            return System.Text.Encoding.ASCII.GetString(data, (int)absoluteOffset, (int)length);
-                        }
+                        catch { }
                     }
                 }
             }
-            catch
+            catch { }
+
+            return null;
+        }
+
+        private static string ExtractVersionNumber(string versionString)
+        {
+            if (string.IsNullOrEmpty(versionString))
+                return null;
+
+            var match = Regex.Match(versionString, @"Version\s+(\d+\.?\d*)");
+            if (match.Success)
             {
+                return match.Groups[1].Value;
             }
 
+            match = Regex.Match(versionString, @"(\d+\.\d+)");
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+
+            return versionString.Trim();
+        }
+
+        private static string ExtractVersionFromFileName(string fontPath)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(fontPath);
+            var match = Regex.Match(fileName, @"v?(\d+\.\d+)");
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
             return null;
         }
 
@@ -166,8 +151,9 @@ namespace FontManager.Utils
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Debug($"Failed to read font family name from {fontPath}: {ex.Message}");
             }
 
             return Path.GetFileNameWithoutExtension(fontPath);

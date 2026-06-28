@@ -24,6 +24,7 @@ namespace FontManager.Forms
             this.panelTop = new System.Windows.Forms.Panel();
             this.btnCheckUpdates = new System.Windows.Forms.Button();
             this.btnUpdateAll = new System.Windows.Forms.Button();
+            this.btnDownload = new System.Windows.Forms.Button();
             this.btnSettings = new System.Windows.Forms.Button();
             this.btnPreview = new System.Windows.Forms.Button();
             this.btnBackup = new System.Windows.Forms.Button();
@@ -80,6 +81,7 @@ namespace FontManager.Forms
             
             this.panelTop.Controls.Add(this.btnCheckUpdates);
             this.panelTop.Controls.Add(this.btnUpdateAll);
+            this.panelTop.Controls.Add(this.btnDownload);
             this.panelTop.Controls.Add(this.btnSettings);
             this.panelTop.Controls.Add(this.btnPreview);
             this.panelTop.Controls.Add(this.btnBackup);
@@ -107,39 +109,47 @@ namespace FontManager.Forms
             this.btnUpdateAll.UseVisualStyleBackColor = true;
             this.btnUpdateAll.Click += new System.EventHandler(this.btnUpdateAll_Click);
             
-            this.btnSettings.Location = new System.Drawing.Point(224, 15);
+            this.btnDownload.Location = new System.Drawing.Point(224, 15);
+            this.btnDownload.Name = "btnDownload";
+            this.btnDownload.Size = new System.Drawing.Size(75, 30);
+            this.btnDownload.TabIndex = 2;
+            this.btnDownload.Text = "下载";
+            this.btnDownload.UseVisualStyleBackColor = true;
+            this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
+            
+            this.btnSettings.Location = new System.Drawing.Point(305, 15);
             this.btnSettings.Name = "btnSettings";
             this.btnSettings.Size = new System.Drawing.Size(75, 30);
-            this.btnSettings.TabIndex = 2;
+            this.btnSettings.TabIndex = 3;
             this.btnSettings.Text = "设置";
             this.btnSettings.UseVisualStyleBackColor = true;
             this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             
-            this.btnPreview.Location = new System.Drawing.Point(305, 15);
+            this.btnPreview.Location = new System.Drawing.Point(386, 15);
             this.btnPreview.Name = "btnPreview";
             this.btnPreview.Size = new System.Drawing.Size(75, 30);
-            this.btnPreview.TabIndex = 3;
+            this.btnPreview.TabIndex = 4;
             this.btnPreview.Text = "预览";
             this.btnPreview.UseVisualStyleBackColor = true;
             this.btnPreview.Click += new System.EventHandler(this.btnPreview_Click);
             
-            this.btnBackup.Location = new System.Drawing.Point(386, 15);
+            this.btnBackup.Location = new System.Drawing.Point(467, 15);
             this.btnBackup.Name = "btnBackup";
             this.btnBackup.Size = new System.Drawing.Size(75, 30);
-            this.btnBackup.TabIndex = 4;
+            this.btnBackup.TabIndex = 5;
             this.btnBackup.Text = "备份";
             this.btnBackup.UseVisualStyleBackColor = true;
             this.btnBackup.Click += new System.EventHandler(this.btnBackup_Click);
             
-            this.progressBar.Location = new System.Drawing.Point(480, 20);
+            this.progressBar.Location = new System.Drawing.Point(560, 20);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(200, 20);
-            this.progressBar.TabIndex = 5;
+            this.progressBar.TabIndex = 6;
             
-            this.lblStatus.Location = new System.Drawing.Point(480, 5);
+            this.lblStatus.Location = new System.Drawing.Point(560, 5);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(200, 15);
-            this.lblStatus.TabIndex = 6;
+            this.lblStatus.TabIndex = 7;
             this.lblStatus.Text = "";
             
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -184,6 +194,7 @@ namespace FontManager.Forms
         private System.Windows.Forms.Panel panelTop;
         private System.Windows.Forms.Button btnCheckUpdates;
         private System.Windows.Forms.Button btnUpdateAll;
+        private System.Windows.Forms.Button btnDownload;
         private System.Windows.Forms.Button btnSettings;
         private System.Windows.Forms.Button btnPreview;
         private System.Windows.Forms.Button btnBackup;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,6 +15,7 @@ namespace FontManager.Forms
         private readonly UpdateService _updateService;
         private readonly FontService _fontService;
         private readonly BackupService _backupService;
+        private readonly GitHubService _gitHubService;
         private List<FontFamily> _fontFamilies;
         private List<UpdateInfo> _updates;
 
@@ -23,14 +25,17 @@ namespace FontManager.Forms
             _updateService = new UpdateService();
             _fontService = new FontService();
             _backupService = new BackupService();
+            _gitHubService = new GitHubService();
             _fontFamilies = GitHubService.GetSupportedFontFamilies();
 
             _updateService.ProgressChanged += UpdateService_ProgressChanged;
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        private async void MainForm_Load(object sender, EventArgs e)
         {
-            LoadFontList();
+            toolStripStatusLabel.Text = "正在加载字体列表...";
+            await Task.Run(() => LoadFontList());
+            toolStripStatusLabel.Text = "就绪";
         }
 
         private void LoadFontList()
@@ -141,6 +146,87 @@ namespace FontManager.Forms
             {
                 btnUpdateAll.Enabled = true;
                 btnCheckUpdates.Enabled = true;
+            }
+        }
+
+        private async void btnDownload_Click(object sender, EventArgs e)
+        {
+            if (dgvFonts.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("请先选择一个字体", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var family = (FontFamily)dgvFonts.SelectedRows[0].Tag;
+            
+            if (_updates == null)
+            {
+                await CheckForUpdatesAsync();
+            }
+
+            var update = _updates?.FirstOrDefault(u => u.FontFamily.Name == family.Name);
+            if (update == null || update.FontAssets.Count == 0)
+            {
+                MessageBox.Show("没有可下载的文件，请先检查更新", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using (var dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = $"选择 {family.Name} 的下载目录";
+                dialog.SelectedPath = ConfigManager.Settings.DownloadDirectory;
+                
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    btnDownload.Enabled = false;
+                    try
+                    {
+                        string downloadDir = Path.Combine(dialog.SelectedPath, family.Name);
+                        if (!Directory.Exists(downloadDir))
+                        {
+                            Directory.CreateDirectory(downloadDir);
+                        }
+
+                        int total = update.FontAssets.Count;
+                        int completed = 0;
+                        int failed = 0;
+
+                        foreach (var asset in update.FontAssets)
+                        {
+                            toolStripStatusLabel.Text = $"下载 {asset.Name} ({completed + 1}/{total})...";
+                            progressBar.Value = (int)((completed / (double)total) * 100);
+
+                            try
+                            {
+                                string filePath = Path.Combine(downloadDir, asset.Name);
+                                await _gitHubService.DownloadAssetToFileAsync(asset, filePath);
+                                completed++;
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Error($"Failed to download {asset.Name}", ex);
+                                failed++;
+                            }
+                        }
+
+                        progressBar.Value = 100;
+                        string message = $"下载完成！\n成功: {completed} 个文件\n失败: {failed} 个文件\n保存位置: {downloadDir}";
+                        MessageBox.Show(message, "下载完成", MessageBoxButtons.OK, 
+                            failed > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+                        
+                        toolStripStatusLabel.Text = $"下载完成: {family.Name}";
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Download failed", ex);
+                        MessageBox.Show($"下载失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        btnDownload.Enabled = true;
+                        progressBar.Value = 0;
+                    }
+                }
             }
         }
 
