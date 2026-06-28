@@ -28,14 +28,9 @@ namespace FontManager.Forms
             _updateService.ProgressChanged += UpdateService_ProgressChanged;
         }
 
-        private async void MainForm_Load(object sender, EventArgs e)
+        private void MainForm_Load(object sender, EventArgs e)
         {
             LoadFontList();
-
-            if (ConfigManager.Settings.AutoCheckUpdates)
-            {
-                await CheckForUpdatesAsync();
-            }
         }
 
         private void LoadFontList()

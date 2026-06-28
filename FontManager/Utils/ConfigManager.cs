@@ -15,7 +15,7 @@ namespace FontManager.Utils
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "FontManager", "Backups");
         
-        public bool AutoCheckUpdates { get; set; } = true;
+        public bool AutoCheckUpdates { get; set; } = false;
         public bool AutoInstallFonts { get; set; } = true;
         public bool CreateBackupBeforeUpdate { get; set; } = true;
         public List<string> EnabledFontFamilies { get; set; } = new List<string>();

@@ -25,11 +25,19 @@ jobs:
     - name: Build
       run: msbuild FontManager/FontManager.csproj /p:Configuration=Release /p:Platform=AnyCPU
 
-    - name: Upload artifact
+    - name: Install ILMerge
+      run: nuget install ILMerge -OutputDirectory tools
+
+    - name: Merge into single exe
+      run: |
+        $ilmerge = (Get-ChildItem -Path "tools" -Recurse -Filter "ilmerge.exe" | Select-Object -First 1).FullName
+        & $ilmerge /out:FontManager.exe FontManager/bin/Release/FontManager.exe FontManager/bin/Release/Newtonsoft.Json.dll /target:winexe /targetplatform:v4,"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2"
+
+    - name: Upload single exe
       uses: actions/upload-artifact@v4
       with:
         name: FontManager
-        path: FontManager/bin/Release/
+        path: FontManager.exe
 
   release:
     needs: build
@@ -42,13 +50,9 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: FontManager
-        path: release/
-
-    - name: Create ZIP
-      run: cd release && zip -r ../FontManager-${{ github.ref_name }}.zip .
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        files: FontManager-${{ github.ref_name }}.zip
+        files: FontManager.exe
         generate_release_notes: true

@@ -36,6 +36,20 @@ namespace FontManager.Services
 
             try
             {
+                // 扫描系统字体目录 C:\Windows\Fonts
+                if (Directory.Exists(SystemFontDirectory))
+                {
+                    foreach (var file in Directory.GetFiles(SystemFontDirectory, "*.ttf"))
+                    {
+                        var fontFile = CreateFontFileFromFile(file);
+                        if (fontFile != null && fontFile.FontFamilyName.Contains("LXGW", StringComparison.OrdinalIgnoreCase))
+                        {
+                            fonts.Add(fontFile);
+                        }
+                    }
+                }
+
+                // 扫描用户字体目录
                 if (Directory.Exists(UserFontDirectory))
                 {
                     foreach (var file in Directory.GetFiles(UserFontDirectory, "*.ttf"))
@@ -45,13 +59,6 @@ namespace FontManager.Services
                         {
                             fonts.Add(fontFile);
                         }
-                    }
-                }
-
-                using (var installedFonts = new InstalledFontCollection())
-                {
-                    foreach (var fontFamily in installedFonts.Families)
-                    {
                     }
                 }
             }
@@ -66,7 +73,9 @@ namespace FontManager.Services
         public List<FontFile> GetInstalledFontsByFamily(string familyName)
         {
             return GetInstalledFonts()
-                .Where(f => f.FontFamilyName.Contains(familyName) || familyName.Contains(f.FontFamilyName))
+                .Where(f => f.FontFamilyName != null && 
+                    (f.FontFamilyName.IndexOf(familyName, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     familyName.IndexOf(f.FontFamilyName, StringComparison.OrdinalIgnoreCase) >= 0))
                 .ToList();
         }
 

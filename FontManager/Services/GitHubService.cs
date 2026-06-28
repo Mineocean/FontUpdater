@@ -27,15 +27,9 @@ namespace FontManager.Services
                 new FontFamily { Name = "霞鹜文楷轻便版", RepoOwner = "lxgw", RepoName = "LxgwWenKai-Lite", Description = "精简版，去除部分汉字" },
                 new FontFamily { Name = "霞鹜文楷GB", RepoOwner = "lxgw", RepoName = "LxgwWenkaiGB", Description = "GB标准版" },
                 new FontFamily { Name = "霞鹜文楷TC", RepoOwner = "lxgw", RepoName = "LxgwWenkaiTC", Description = "繁体中文版" },
-                new FontFamily { Name = "霞鹜文楷屏幕阅读版", RepoOwner = "lxgw", RepoName = "LxgwWenKaiScreen", Description = "屏幕阅读优化版" },
-                new FontFamily { Name = "霞鹜文楷Mono", RepoOwner = "lxgw", RepoName = "LxgwWenKaiMono", Description = "等宽版" },
-                new FontFamily { Name = "霞鹜文楷Clear", RepoOwner = "lxgw", RepoName = "LxgwWenKaiClear", Description = "清晰版" },
-                new FontFamily { Name = "霞鹜文楷Italic", RepoOwner = "lxgw", RepoName = "LxgwWenKaiItalic", Description = "斜体版" },
-                new FontFamily { Name = "霞鹜文楷2nd", RepoOwner = "lxgw", RepoName = "LxgwWenKai-2nd", Description = "第二版" },
-                new FontFamily { Name = "霞鹜文楷3rd", RepoOwner = "lxgw", RepoName = "LxgwWenKai-3rd", Description = "第三版" },
-                new FontFamily { Name = "霞鹜文楷4th", RepoOwner = "lxgw", RepoName = "LxgwWenKai-4th", Description = "第四版" },
-                new FontFamily { Name = "霞鹜文楷5th", RepoOwner = "lxgw", RepoName = "LxgwWenKai-5th", Description = "第五版" },
-                new FontFamily { Name = "霞鹜文楷6th", RepoOwner = "lxgw", RepoName = "LxgwWenKai-6th", Description = "第六版" }
+                new FontFamily { Name = "霞鹜文楷屏幕阅读版", RepoOwner = "lxgw", RepoName = "LxgwWenKai-Screen", Description = "屏幕阅读优化版" },
+                new FontFamily { Name = "霞鹜文楷韩文版", RepoOwner = "lxgw", RepoName = "LxgwWenkaiKR", Description = "韩文版" },
+                new FontFamily { Name = "霞鹜文楷GB轻便版", RepoOwner = "lxgw", RepoName = "LxgwWenkaiGB-Lite", Description = "GB精简版" }
             };
         }
 
